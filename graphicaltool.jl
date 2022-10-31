@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.19.9
+# v0.19.14
 
 using Markdown
 using InteractiveUtils
@@ -202,7 +202,10 @@ end
 known_points.error95
 
 # ╔═╡ d038cab7-22e0-4595-9bd6-ed2e7ff5f247
+begin
 PlotlyJS.savefig(myplt, "myplt.html")
+PlotlyJS.savefig(myplt, "myplt.png")
+end
 
 # ╔═╡ 00000000-0000-0000-0000-000000000001
 PLUTO_PROJECT_TOML_CONTENTS = """
@@ -233,9 +236,9 @@ XLSX = "~0.8.4"
 PLUTO_MANIFEST_TOML_CONTENTS = """
 # This file is machine-generated - editing it directly is not advised
 
-julia_version = "1.8.1"
+julia_version = "1.8.2"
 manifest_format = "2.0"
-project_hash = "ef573a4830a4d6e8f0ed61e52d527e8bee901816"
+project_hash = "22f09ede46b5a439df68070538c227f944f794ba"
 
 [[deps.AbstractPlutoDingetjes]]
 deps = ["Pkg"]
@@ -1083,7 +1086,7 @@ version = "1.10.0"
 [[deps.Tar]]
 deps = ["ArgTools", "SHA"]
 uuid = "a4e569a6-e804-4fa4-b0f3-eef7a1d5b13e"
-version = "1.10.0"
+version = "1.10.1"
 
 [[deps.TensorCore]]
 deps = ["LinearAlgebra"]
@@ -1427,7 +1430,7 @@ version = "1.4.1+0"
 # ╟─25364a7e-0372-4fa2-aee5-31551ee0fe7f
 # ╟─c5ab90ca-e04a-4154-85be-1d22beaadbe8
 # ╟─cd922f3d-7363-465b-b922-7838ea77859e
-# ╠═f74fd7a0-75bb-4d17-86f9-750681cfec84
+# ╟─f74fd7a0-75bb-4d17-86f9-750681cfec84
 # ╠═28089ccf-d267-4b9e-a1c7-2c027d393bdd
 # ╠═725b0819-937f-4298-9aa5-01ee11c5522f
 # ╠═4cd77441-cfd6-467f-91ca-7534143941f3
