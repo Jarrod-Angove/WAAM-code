@@ -1,13 +1,4 @@
 name,id,c_ratecs,error95,ttsms,powerfile,range
-Plate20601 region 1,2,-347.24677,10.368562,0.0041,Plate20601weld_params.xlsx,"[8, 736]"
-Plate20601 region 2,2,-377.62674,36.73312,0.0041,Plate20601weld_params.xlsx,"[1064, 1764]"
-Plate30601 region 1,3,-254.8511,18.180841,0.0041,Plate30601weld_params.xlsx,"[24, 835]"
-Plate30601 region 2,3,-287.29648,34.61003,0.0041,Plate30601weld_params.xlsx,"[1218, 2018]"
-Plate40601 region 1,4,-261.49722,13.238057,0.0025,Plate40601weld_params.xlsx,"[60, 1438]"
-Plate40601 region 2,4,-209.01065,7.171863,0.0025,Plate40601weld_params.xlsx,"[1925, 3304]"
-Plate50601 region 1,5,-377.83066,16.51889,0.0041,Plate50601weld_params.xlsx,"[926, 1770]"
-Plate50601 region 2,5,-346.37286,10.85743,0.0041,Plate50601weld_params.xlsx,"[2203, 3074]"
-Plate6SecondBead region 1,6,-178.26389,36.86045,0.0041,Plate60601weld_params.xlsx,"[11297, 12179]"
 Plate 70819 region 1,7,-167.96182,4.27788,0.0041,Plate7weld_params.xlsx,"[408, 1670]"
 Plate110819 region 1,11,-158.67236,7.62142,0.0025,Plate11.xlsx,"[189, 1610]"
 Plate110819 region 2,11,-138.57892,2.5291739,0.0025,Plate11.xlsx,"[2060, 3416]"
@@ -17,18 +8,32 @@ Plate130829 region 1,13,-108.48489,7.6795936,0.0025,0829Plate13weld_params.xlsx,
 Plate130829 region 2,13,-125.58166,5.407683,0.0025,0829Plate13weld_params.xlsx,"[2352, 3557]"
 Plate140829 region 1,14,-168.30495,4.5835032,0.0025,0829Plate14weld_params.xlsx,"[652, 2075]"
 Plate140829 region 2,14,-91.84478,10.23771,0.0025,0829Plate14weld_params.xlsx,"[2582, 3913]"
-Plate150831 region 1,15,-68.26494,8.470408,0.0025,,
-Plate150831 region 2,15,-111.77816,9.218521,0.0025,,
-Plate160831 region 1,16,-154.71657,12.49388,0.0025,,
-Plate17p1 region 1,17,-65.80781,6.41894,0.0025,,
-Plate17p2 region 1,17,-104.24214,4.854581,0.0025,,
-Plate180831 region 1,18,-158.79971,3.414797,0.0025,,
-Plate180831 region 2,18,-103.512,6.6832156,0.0025,,
-Plate19 region 1,19,-144.7381,3.7966435,0.0025,Plate190922weld_params.csv,
+Plate150831 region 1,15,-68.26494,8.470408,0.0025,Plate150831weld_params (1).csv,"[102, 1290]"
+Plate150831 region 2,15,-111.77816,9.218521,0.0025,Plate150831weld_params (1).csv,"[1631, 2821]"
+Plate160831 region 1,16,-154.71657,12.49388,0.0025,Plate160831weld_params (1).csv,"[2073, 3416]"
+Plate17p1 region 1,17,-65.80781,6.41894,0.0025,Plate170831weld_params (1).csv,"[140, 1560]"
+Plate17p2 region 1,17,-104.24214,4.854581,0.0025,Plate170831weld_params (1).csv,"[324, 1747]"
+Plate180831 region 1,18,-158.79971,3.414797,0.0025,Plate180831weld_params (1).csv,"[102, 1126]"
+Plate180831 region 2,18,-103.512,6.6832156,0.0025,Plate180831weld_params (1).csv,"[1490, 2474]"
+Plate19 region 1,19,-144.7381,3.7966435,0.0025,Plate190922weld_params.csv,"[340, 1301]"
 Plate19Bead2 region 1,19,-104.679016,5.474925,0.0025,Plate190922weld_params.csv,"[330, 1320]"
 Plate200922 region 1,20,-112.94357,6.828172,0.0025,Platete200922weld_params.csv,"[127, 1251]"
 Plate200922 region 2,20,-174.56943,4.4653797,0.0025,Platete200922weld_params.csv,"[1599, 2722]"
+Plate20601 region 1,2,-347.24677,10.368562,0.0041,Plate20601weld_params.xlsx,"[8, 736]"
+Plate20601 region 2,2,-377.62674,36.73312,0.0041,Plate20601weld_params.xlsx,"[1064, 1764]"
 Plate210922 region 1,21,-74.34163,4.5959063,0.0025,Platete210922weld_params.csv,"[149, 1557]"
 Plate210922 region 2,21,-129.01865,11.121534,0.0025,Platete210922weld_params.csv,"[2001, 3423]"
+Plate22Oct21 region 1,22,-216.24123,6.391874,0.0025,Plate22_weld_2022-10-21-16-48-38-fronius-weld_params.csv,"[1547, 2794]"
+Plate23Oct25 region 1,23,-114.094635,5.5404587,0.0025,Plate23_weld_2022-10-25-13-50-24-fronius-weld_params.csv,"[160, 1252]"
+Plate23Oct25 region 2,23,-70.754456,11.838372,0.0025,Plate23_weld_2022-10-25-13-50-24-fronius-weld_params.csv,"[1653, 2762]"
+Plate24 region 1,24,-99.634544,2.0293267,0.0025,24_slash_fronius_slash_weld_params.csv,"[272, 1177]"
+Plate25 region 1,25,-78.02036,10.545884,0.0025,25_slash_fronius_slash_weld_params.csv,"[341, 1518]"
+Plate30601 region 1,3,-254.8511,18.180841,0.0041,Plate30601weld_params.xlsx,"[24, 835]"
+Plate30601 region 2,3,-287.29648,34.61003,0.0041,Plate30601weld_params.xlsx,"[1218, 2018]"
+Plate40601 region 1,4,-261.49722,13.238057,0.0025,Plate40601weld_params.xlsx,"[60, 1438]"
+Plate40601 region 2,4,-209.01065,7.171863,0.0025,Plate40601weld_params.xlsx,"[1925, 3304]"
+Plate50601 region 1,5,-377.83066,16.51889,0.0041,Plate50601weld_params.xlsx,"[926, 1770]"
+Plate50601 region 2,5,-346.37286,10.85743,0.0041,Plate50601weld_params.xlsx,"[2203, 3074]"
+Plate6SecondBead region 1,6,-178.26389,36.86045,0.0041,Plate60601weld_params.xlsx,"[11297, 12179]"
 PlateBBeads3-4 region 1,341,-369.95877,64.12995,,PlatebBeads3-4weld_params.csv,
 PlateBBeads3-4 region 2,341,-179.40639,27.835712,,PlatebBeads3-4weld_params.csv,"[12, 1518]"

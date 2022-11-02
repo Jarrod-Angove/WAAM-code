@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.19.14
+# v0.19.9
 
 using Markdown
 using InteractiveUtils
@@ -15,7 +15,7 @@ macro bind(def, element)
 end
 
 # ╔═╡ f7a28e7a-540f-11ed-3d35-03d9d4bafcd6
-using PlutoUI, DataFrames, XLSX, CSV, PlotlyJS, Plots, WebIO, Unitful
+using PlutoUI, DataFrames, XLSX, CSV, PlotlyJS, Plots, Unitful, Dates, TimesDates
 
 # ╔═╡ b205b383-3b93-4165-b98d-61b89131e34a
 files = readdir("./power_data/")
@@ -29,20 +29,30 @@ frames = []
 labels = []
 split_frames = []
 split_labels = []
+df = DateFormat("yyy/mm/dd:hh:mm:ss")
 for file in files
     path = "./power_data/"*file
-    if file[end-2:end] == "lsx" && file[1]!="~"
-		try
+    if ((file[end-2:end] == "lsx") && ! contains(file, "~") && !contains(file, "Joint") && !contains(file, "joint"))
 			data = DataFrame(XLSX.readtable(path, 1, header = false, first_row = 2))
 			label = file[1:end-5]
+			data = data[!,1:3]
 			metadata!(data, "label", label, style = :note)
         	push!(frames, data)
         	push!(labels, label)
-		catch err
-			println(err)
+	elseif ((file[end-2:end] == "csv") && (contains(file, "weld")) && (contains(file, "fronius")) && !contains(file, "joint") && !contains(file, "Joint"))
+		data = DataFrame(CSV.read(path, DataFrame; header=true, footerskip = 2))
+		label = file[1:end-4]
+		try 
+		data = data[!, [1, 8, 9]]
+		catch err 
+			data = data[!, [4, 6, 7]]
 		end
-	elseif file[end-2:end] == "csv"
+		metadata!(data, "label", label, style = :note)
+		push!(frames, data)
+		push!(labels, label)
+	elseif (file[end-2:end] == "csv") && !contains(file, "fronius") && !contains(file, "joint") && !contains(file, "Joint")
 		data = DataFrame(CSV.read(path, DataFrame; header=false, skipto=2, footerskip = 2))
+		data = data[!, 1:3]
 		label = file[1:end-4]
 		metadata!(data, "label", label, style = :note)
 		push!(frames, data)
@@ -51,26 +61,22 @@ for file in files
 end
 end
 
-# ╔═╡ 01554cb4-ad02-4662-9172-4ad20bb25e18
-sense = [frames[1] => labels[1],
-frames[2] => labels[2],
-frames[3] => labels[3],
-frames[4] => labels[4],
-frames[5] => labels[5],
-frames[6] => labels[6],
-frames[7] => labels[7],
-frames[8] => labels[8],
-frames[9] => labels[9],
-frames[10] => labels[10],
-frames[11] => labels[11],
-frames[12] => labels[12],
-frames[13] => labels[13],
-frames[14] => labels[14], 
-frames[15] => labels[15], 
-frames[16] => labels[16], 
-frames[17] => labels[17],
-frames[18] => labels[18], 
-frames[19] => labels[19]];
+# ╔═╡ 3c8111bc-c736-4062-90cc-9f3a4edecf56
+# This creates a vector of key-value pairs from the imported data for the drop down selector to work properly
+begin
+s0 = "sense = [";
+strings = []
+sense = Nothing
+for i in 1:length(labels)
+	si = "frames[$i] => labels[$i], "
+	push!(strings, si)
+end
+	fin = s0*string(strings...)[1:end-2]*"];"
+	eval(Meta.parse(fin).args[1])
+end;
+
+# ╔═╡ d9ae5e69-717e-4149-896c-8f450381f130
+labels[25]
 
 # ╔═╡ e10fbb3d-9bee-4416-ab64-80642d964d1d
 @bind frame Select(sense)
@@ -138,20 +144,27 @@ function flip(file, range, tts)
 	path = "./power_data/"*file
 if file[end-2:end] == "lsx" && file[1]!="~"
 		data = DataFrame(XLSX.readtable(path, 1, header = false, first_row = 2))
-elseif file[end-2:end] == "csv"
+elseif (file[end-2:end] == "csv") && (contains(file, "weld")) && (contains(file, "fronius"))
 		data = DataFrame(CSV.read(path, DataFrame; header=false, skipto=2, footerskip = 2))
-	
+		try 
+		data = data[!, [1, 8, 9]]
+		catch err 
+			data = data[!, [4, 6, 7]]
+		end
+elseif (file[end-2:end] == "csv")
+	data = DataFrame(CSV.read(path, DataFrame; header=false, skipto=2, footerskip = 2))
+	data = data[:, 1:3]
 end
 	powers = data[:, 2] .* data[:, 3]
 	power = (mean(data[r1:r2, 2])u"A" * mean(data[r1:r2,3])u"V" / Quantity(tts, u"m/s")) |> u"J/mm"
 	rangeplot = Plots.plot(powers, label = "Data", legend = :bottomright);
 	plot!(r1:r2, powers[r1:r2], fill = (0, 0.2, :orange), label = "mean = $(mean(powers))");
-	
+
 	return [power, rangeplot]
 end;
 
 # ╔═╡ b73468ce-182d-41a8-a529-290f584caa36
-flip(scrubbed[2, :powerfile], scrubbed[2, :range], scrubbed[2, :ttsms])
+flip(scrubbed[2, :powerfile], scrubbed[2, :range], scrubbed[2, :ttsms]);
 
 # ╔═╡ bb5e1ce8-c19b-417d-b933-ccb69be142f8
 begin
@@ -167,10 +180,7 @@ end
 end;
 
 # ╔═╡ e4cc6c38-d120-4cd1-b5af-bae21f3aaa85
-powers
-
-# ╔═╡ 06643fef-e7ae-46f6-a85e-817cdadbe232
-scrubbed
+scrubbed.powers
 
 # ╔═╡ 34d5635a-8e25-4f6b-9dd9-adb8831dcc0a
 combinedf = leftjoin(expanddf, select(scrubbed, :name, :powers, :selection), on = :name);
@@ -180,6 +190,9 @@ begin
 transform!(combinedf, :c_ratecs => (x -> abs.(x)) => :c_ratecs, :powers => (x->ustrip.(u"J/mm",x)) => :powers)
 end
 
+# ╔═╡ 4d495b03-3999-4624-8ada-a35354d23afa
+combinedf[28, :]
+
 # ╔═╡ e00f766c-66d0-464f-ab95-ff89a911c299
 combinedf
 
@@ -188,7 +201,7 @@ known_points = dropmissing(combinedf);
 
 # ╔═╡ 34a7aa4b-2d40-4a66-be79-fed470cd6185
 begin
-using JSON
+using JSON, WebIO
 myplt = PlotlyJS.plot(known_points, x = :powers, y = :c_ratecs, mode = "markers", error_y=attr(type="data", array=:error95, visible = true), marker=attr(size=12, line=attr(width=2, color="DarkSlateGrey")), text = :name,
 	Layout(
 	hovername = :name,
@@ -207,15 +220,26 @@ PlotlyJS.savefig(myplt, "myplt.html")
 PlotlyJS.savefig(myplt, "myplt.png")
 end
 
+# ╔═╡ 6cb06dbf-5239-44f2-8ac4-d1e776237167
+html"""
+<style>
+input[type*="range"] {
+	width: 100%;
+}
+</style>
+"""
+
 # ╔═╡ 00000000-0000-0000-0000-000000000001
 PLUTO_PROJECT_TOML_CONTENTS = """
 [deps]
 CSV = "336ed68f-0bac-5ca0-87d4-7b16caf5d00b"
 DataFrames = "a93c6f00-e57d-5684-b7b6-d8193f3e46c0"
+Dates = "ade2ca70-3891-5945-98fb-dc099432e06a"
 JSON = "682c06a0-de6a-54ab-a142-c8b1cf79cde6"
 PlotlyJS = "f0f68f2c-4968-5e81-91da-67840de0976a"
 Plots = "91a5bcdd-55d7-5caf-9e0b-520d859cae80"
 PlutoUI = "7f904dfe-b85e-4ff6-b463-dae2292396a8"
+TimesDates = "bdfc003b-8df8-5c39-adcd-3a9087f5df4a"
 Unitful = "1986cc42-f94f-5a68-af5c-568840ba703d"
 WebIO = "0f1e0344-ec1d-5b48-a673-e5cf874b6c29"
 XLSX = "fdbf4ff8-1666-58a4-91e7-1b58723a45e0"
@@ -227,6 +251,7 @@ JSON = "~0.21.3"
 PlotlyJS = "~0.18.10"
 Plots = "~1.35.5"
 PlutoUI = "~0.7.48"
+TimesDates = "~0.3.1"
 Unitful = "~1.12.0"
 WebIO = "~0.8.18"
 XLSX = "~0.8.4"
@@ -236,9 +261,9 @@ XLSX = "~0.8.4"
 PLUTO_MANIFEST_TOML_CONTENTS = """
 # This file is machine-generated - editing it directly is not advised
 
-julia_version = "1.8.2"
+julia_version = "1.8.1"
 manifest_format = "2.0"
-project_hash = "22f09ede46b5a439df68070538c227f944f794ba"
+project_hash = "66e4b0017b3cf9352845c606af43ee9f3398ca53"
 
 [[deps.AbstractPlutoDingetjes]]
 deps = ["Pkg"]
@@ -345,6 +370,12 @@ deps = ["Artifacts", "Libdl"]
 uuid = "e66e0078-7015-5450-92f7-15fbd957f2ae"
 version = "0.5.2+0"
 
+[[deps.CompoundPeriods]]
+deps = ["Dates"]
+git-tree-sha1 = "5879c1c39fea46fb9eb5b8c9323f08f9fb5c4de5"
+uuid = "a216cea6-0a8c-5945-ab87-5ade47210022"
+version = "0.5.1"
+
 [[deps.ConstructionBase]]
 deps = ["LinearAlgebra"]
 git-tree-sha1 = "fb21ddd70a051d882a1686a5a550990bbe371a95"
@@ -411,6 +442,11 @@ deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg"]
 git-tree-sha1 = "bad72f730e9e91c08d9427d5e8db95478a3c323d"
 uuid = "2e619515-83b5-522b-bb60-26c02a35a201"
 version = "2.4.8+0"
+
+[[deps.ExprTools]]
+git-tree-sha1 = "56559bbef6ca5ea0c0818fa5c90320398a6fbf8d"
+uuid = "e2ba6199-217a-4e67-a87a-7c52f15ade04"
+version = "0.1.8"
 
 [[deps.EzXML]]
 deps = ["Printf", "XML2_jll"]
@@ -663,6 +699,10 @@ git-tree-sha1 = "1370f8202dac30758f3c345f9909b97f53d87d3f"
 uuid = "50d2b5c4-7a5e-59d5-8109-a42b560f39c0"
 version = "0.15.1"
 
+[[deps.LazyArtifacts]]
+deps = ["Artifacts", "Pkg"]
+uuid = "4af54fe1-eca0-43a8-85a7-787d91b784e3"
+
 [[deps.LibCURL]]
 deps = ["LibCURL_jll", "MozillaCACerts_jll"]
 uuid = "b27032c2-a3e7-50c8-80cd-2d36dbcbfd21"
@@ -785,6 +825,12 @@ version = "1.0.2"
 
 [[deps.Mmap]]
 uuid = "a63ad114-7e13-5084-954f-fe012c677804"
+
+[[deps.Mocking]]
+deps = ["ExprTools"]
+git-tree-sha1 = "748f6e1e4de814b101911e64cc12d83a6af66782"
+uuid = "78c3b35d-d492-501b-9361-3d52fe80e533"
+version = "0.7.2"
 
 [[deps.MozillaCACerts_jll]]
 uuid = "14a3606d-f60d-562e-9121-12d972cd8159"
@@ -1086,7 +1132,7 @@ version = "1.10.0"
 [[deps.Tar]]
 deps = ["ArgTools", "SHA"]
 uuid = "a4e569a6-e804-4fa4-b0f3-eef7a1d5b13e"
-version = "1.10.1"
+version = "1.10.0"
 
 [[deps.TensorCore]]
 deps = ["LinearAlgebra"]
@@ -1097,6 +1143,18 @@ version = "0.1.1"
 [[deps.Test]]
 deps = ["InteractiveUtils", "Logging", "Random", "Serialization"]
 uuid = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
+
+[[deps.TimeZones]]
+deps = ["Dates", "Downloads", "InlineStrings", "LazyArtifacts", "Mocking", "Printf", "RecipesBase", "Scratch", "Unicode"]
+git-tree-sha1 = "d634a3641062c040fc8a7e2a3ea17661cc159688"
+uuid = "f269a46b-ccf7-5d73-abea-4c690281aa53"
+version = "1.9.0"
+
+[[deps.TimesDates]]
+deps = ["CompoundPeriods", "Dates", "TimeZones"]
+git-tree-sha1 = "4ca99fd8145f6ae574b6f98e1233148e7b91ac30"
+uuid = "bdfc003b-8df8-5c39-adcd-3a9087f5df4a"
+version = "0.3.1"
 
 [[deps.TranscodingStreams]]
 deps = ["Random", "Test"]
@@ -1421,7 +1479,8 @@ version = "1.4.1+0"
 # ╟─b205b383-3b93-4165-b98d-61b89131e34a
 # ╠═f516201b-992c-49a3-b306-3f726f2f9744
 # ╠═5da2de9e-c0ce-4d19-9476-cd5b2527fd75
-# ╟─01554cb4-ad02-4662-9172-4ad20bb25e18
+# ╠═3c8111bc-c736-4062-90cc-9f3a4edecf56
+# ╠═d9ae5e69-717e-4149-896c-8f450381f130
 # ╟─e10fbb3d-9bee-4416-ab64-80642d964d1d
 # ╟─ec5e8fa2-f192-4f64-9443-80bc0df92c97
 # ╟─c219b525-3af1-42d5-a8b0-350f5f5ac7e8
@@ -1437,13 +1496,14 @@ version = "1.4.1+0"
 # ╠═b73468ce-182d-41a8-a529-290f584caa36
 # ╠═bb5e1ce8-c19b-417d-b933-ccb69be142f8
 # ╠═e4cc6c38-d120-4cd1-b5af-bae21f3aaa85
-# ╠═06643fef-e7ae-46f6-a85e-817cdadbe232
 # ╠═34d5635a-8e25-4f6b-9dd9-adb8831dcc0a
 # ╠═ae2ac5a7-b502-4951-9ee0-f1e08e2e1597
+# ╠═4d495b03-3999-4624-8ada-a35354d23afa
 # ╠═e00f766c-66d0-464f-ab95-ff89a911c299
 # ╠═d085f917-a8eb-4d1b-a2c1-73316203bc54
 # ╠═34a7aa4b-2d40-4a66-be79-fed470cd6185
 # ╠═f1e49314-717c-4d7c-9140-8f4d56f61165
 # ╠═d038cab7-22e0-4595-9bd6-ed2e7ff5f247
+# ╟─6cb06dbf-5239-44f2-8ac4-d1e776237167
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002
