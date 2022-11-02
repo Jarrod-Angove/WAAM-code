@@ -144,6 +144,7 @@ function flip(file, range, tts)
 	path = "./power_data/"*file
 if file[end-2:end] == "lsx" && file[1]!="~"
 		data = DataFrame(XLSX.readtable(path, 1, header = false, first_row = 2))
+	# Some of the files are formatted differently due to the new python script for bag file conversion; this is a quick but dirty fix
 elseif (file[end-2:end] == "csv") && (contains(file, "weld")) && (contains(file, "fronius"))
 		data = DataFrame(CSV.read(path, DataFrame; header=false, skipto=2, footerskip = 2))
 		try 
@@ -188,13 +189,7 @@ combinedf = leftjoin(expanddf, select(scrubbed, :name, :powers, :selection), on 
 # ╔═╡ ae2ac5a7-b502-4951-9ee0-f1e08e2e1597
 begin
 transform!(combinedf, :c_ratecs => (x -> abs.(x)) => :c_ratecs, :powers => (x->ustrip.(u"J/mm",x)) => :powers)
-end
-
-# ╔═╡ 4d495b03-3999-4624-8ada-a35354d23afa
-combinedf[28, :]
-
-# ╔═╡ e00f766c-66d0-464f-ab95-ff89a911c299
-combinedf
+end;
 
 # ╔═╡ d085f917-a8eb-4d1b-a2c1-73316203bc54
 known_points = dropmissing(combinedf);
@@ -204,9 +199,8 @@ begin
 using JSON, WebIO
 myplt = PlotlyJS.plot(known_points, x = :powers, y = :c_ratecs, mode = "markers", error_y=attr(type="data", array=:error95, visible = true), marker=attr(size=12, line=attr(width=2, color="DarkSlateGrey")), text = :name,
 	Layout(
-	hovername = :name,
     title="Heat input vs cooling rate",
-    xaxis_title="Heat input (J/s)",
+    xaxis_title="Heat input (J/mm)",
     yaxis_title="Cooling rate (K/s)"))
 end
 #, text = :name
@@ -261,9 +255,9 @@ XLSX = "~0.8.4"
 PLUTO_MANIFEST_TOML_CONTENTS = """
 # This file is machine-generated - editing it directly is not advised
 
-julia_version = "1.8.1"
+julia_version = "1.8.2"
 manifest_format = "2.0"
-project_hash = "66e4b0017b3cf9352845c606af43ee9f3398ca53"
+project_hash = "1fa4f30f2a1dfc585cd6bb6eecc394962a85c57f"
 
 [[deps.AbstractPlutoDingetjes]]
 deps = ["Pkg"]
@@ -1132,7 +1126,7 @@ version = "1.10.0"
 [[deps.Tar]]
 deps = ["ArgTools", "SHA"]
 uuid = "a4e569a6-e804-4fa4-b0f3-eef7a1d5b13e"
-version = "1.10.0"
+version = "1.10.1"
 
 [[deps.TensorCore]]
 deps = ["LinearAlgebra"]
@@ -1498,12 +1492,10 @@ version = "1.4.1+0"
 # ╠═e4cc6c38-d120-4cd1-b5af-bae21f3aaa85
 # ╠═34d5635a-8e25-4f6b-9dd9-adb8831dcc0a
 # ╠═ae2ac5a7-b502-4951-9ee0-f1e08e2e1597
-# ╠═4d495b03-3999-4624-8ada-a35354d23afa
-# ╠═e00f766c-66d0-464f-ab95-ff89a911c299
 # ╠═d085f917-a8eb-4d1b-a2c1-73316203bc54
 # ╠═34a7aa4b-2d40-4a66-be79-fed470cd6185
 # ╠═f1e49314-717c-4d7c-9140-8f4d56f61165
 # ╠═d038cab7-22e0-4595-9bd6-ed2e7ff5f247
-# ╟─6cb06dbf-5239-44f2-8ac4-d1e776237167
+# ╠═6cb06dbf-5239-44f2-8ac4-d1e776237167
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002
