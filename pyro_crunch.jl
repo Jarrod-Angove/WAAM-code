@@ -5,14 +5,12 @@
 
 using CSV, DataFrames, Plots, Dates, Unitful, LsqFit
 
-# This is the file to be parsed
-#file_path = "./pyromter_data/Plate150831.dat"
-
+# Initiating some variables 
 all_errors = Vector{Float32}()
 all_cooling_rates = Vector{Float32}()
 all_names = Vector{AbstractString}()
 
-# Parsing it into actual numbers and passing it to a dataframe
+# Parsing it into actual numbers and passing it to a new temp csv file
 function to_plots(file_path)
     open(file_path) do file
         # Creating a temp file to hold the line-by-line data  
@@ -33,8 +31,7 @@ function to_plots(file_path)
     df_raw = CSV.read(infile, header=1, delim='\t', DataFrame)
     rm("temp_out.txt", force=true) 
 
-    # Defining some handy functions for later
-
+    # Defining some functions for later
     function timeunit(time)
         # Takes a Dates.Time type and converts it to a Unitful time in seconds
         # This is much easier to work with
@@ -59,6 +56,7 @@ function to_plots(file_path)
         # Take the second derivative of a vector
         ddt = []
         # I assume a constant time step of 0.02s here; this is not technically correct
+        # Good enough for simple filter application
         for i in 2:(length(x)-1)
             # Append the derivative at the current index to ddt
             push!(
@@ -75,17 +73,6 @@ function to_plots(file_path)
         b >= time >= a
     end;
 
-    # This function is broken and I don't know why, but it's supposed to calculate the R² value
-    # It isn't really necessary, but I might use it later
-    function r2_fancy_lin(x, y, a, b)
-        ŷ = lin(x, a, b)
-        ȳ = sum(y)/length(y)
-        SSE = sum((y.-ŷ).^2)
-        SSR = sum((ŷ.-ȳ).^2)
-        SST = SSR + SSE
-        return SSR/SST
-    end
-
     # Making a useable dataframe and applying the above functions to make it computer-legible
     # Note that I am stripping the units off here; time is in seconds, temp is in °C
     df = select(df_raw,
@@ -101,12 +88,12 @@ function to_plots(file_path)
                     Temp = df[2:osize-1, :Temp],
                     Diff = sec_diff(df.Temp)
                     ) 
-    # Temp upper and lower bound; diff bound (symmetric for diff)
+    # Temp upper and lower bound based on the solidus and liquidus temperatures of 17-4PH SS; diff bound (symmetric for diff)
     temp_ub = 1457
     temp_lb = 1266
     diff_b = 10000
 
-    # This is where the garbage is filtered out
+    # This is where the noise from splatter is removed 
     # The diff filter is doing most of the heavy lifting here
     # The diff filter bound diff_b is the hardest part to get right; needs to be tuned
     # The second part, I remove anything with near zero d2T/dt2 to get rid of stragglers
@@ -116,18 +103,17 @@ function to_plots(file_path)
         )
     # If there is a time gap in clusters greater than 2 seconds, create 2 datasets
     # Else, create only one
-
     jump = argmax(diff(clusters.Time))
     jsize = clusters[jump+1, :Time] - clusters[jump, :Time]
 
-    # This is the model (simple linear) used by the least squares fit in the for loop below
+    # This is the model (simple linear) used by the least squares fit in the loop below
     @. model(x, p) = p[1]*x + p[2]
     p0 = [-200.0, 800.0] # This is the starting guess for the fit
 
     regions = Vector{Any}()
     Rs = Vector{Float32}()
 
-    # Tests if the time gap is greater than 5 seconds to figure out if there are two runs or just one
+    # Tests if the time gap is greater than 5 seconds to figure out if there are two beads on the plate or just one
     if jsize>5
         # Seperating them into regions if there are two
         push!(regions,
@@ -144,7 +130,7 @@ function to_plots(file_path)
     intervals = Vector{Any}()
     cooling_rates = Vector{Any}()
     errors = Vector{Float32}()
-
+    # Loop through all of the regions selected above
     for region in regions
         i += 1
         # Time is set to start at 0 for easier model fit and more reasonable graph
@@ -167,7 +153,7 @@ function to_plots(file_path)
         push!(all_names, name)
 
 
-        # This chunck is what makes the plots of the individual regions
+        # This makes the plots of the individual regions
         scatterplot = scatter(xdata, ydata, label = "Data", title = "Plot of $name")
         plot!(x-> κ*x + T, label="$(round(κ,sigdigits=5)) x + $(round(T, sigdigits=5))")
         xlabel!("Time (s)")
@@ -177,7 +163,7 @@ function to_plots(file_path)
 
     end
 
-    # This creates the plot that shows the regions over the whole data set
+    # This creates the plot that shows the regions over the whole data set (reference plots)
     referenceplot = plot(df.Time, df.Temp, label = "Original data")
     scatter!(clusters.Time, clusters.Temp, label = "Selected regions")
     xlabel!("Time (s)")
@@ -186,7 +172,6 @@ function to_plots(file_path)
 end
 
 # Looping through every file in the pyro_data directory an running it through the code above
-# This is probably temporary, but I wanted to make it try all the files
 for file in readdir("./pyro_data/")
     filepath = "./pyro_data/"*file
     try
@@ -200,7 +185,7 @@ end
 # Creating a summary table in a dataframe
 cooling_summary = DataFrame("Sample Name"=>all_names,
                             "Cooling Rate (°C/s)"=>all_cooling_rates,
-                            "95% Margin of Error (±)" =>all_errors)
+                            "95% Margin of Error (±)"=>all_errors)
 # Writing the dataframe into a CSV file
 CSV.write("cooling_summary.csv", cooling_summary)
 

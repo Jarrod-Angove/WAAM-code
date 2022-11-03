@@ -211,7 +211,7 @@ known_points.error95
 # ╔═╡ d038cab7-22e0-4595-9bd6-ed2e7ff5f247
 begin
 PlotlyJS.savefig(myplt, "myplt.html")
-PlotlyJS.savefig(myplt, "myplt.png")
+PlotlyJS.savefig(myplt, "myplt.pdf")
 end
 
 # ╔═╡ 6cb06dbf-5239-44f2-8ac4-d1e776237167
