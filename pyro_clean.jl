@@ -9,6 +9,8 @@ using CSV, DataFrames, Plots, Dates, Unitful, LsqFit
 all_errors = Vector{Float32}()
 all_cooling_rates = Vector{Float32}()
 all_names = Vector{AbstractString}()
+png_files = Vector{AbstractString}()
+png_ref = Vector{AbstractString}()
 
 # Parsing it into actual numbers and passing it to a new temp csv file
 function to_plots(file_path)
@@ -130,6 +132,7 @@ function to_plots(file_path)
     intervals = Vector{Any}()
     cooling_rates = Vector{Any}()
     errors = Vector{Float32}()
+    png_file = Vector{AbstractString}()
     # Loop through all of the regions selected above
     for region in regions
         i += 1
@@ -160,6 +163,9 @@ function to_plots(file_path)
         ylabel!("Temperature (°C)")
         #Saving the plot, creating a name for it based on the original file and it's position in 'regions'
         savefig(scatterplot, "./generated_plots/"*"$(file_path[13:end-4])"*"_plot$i.pdf")
+        savefig(scatterplot, "./plots_pngs/"*"$(file_path[13:end-4])"*"_plot$i.png")
+        push!(png_files, "./generated_plots/"*"$(file_path[13:end-4])"*"_plot$i.png")
+        push!(png_ref, "./plots_pngs/"*"$(file_path[13:end-4])"*"_reference.pdf")
 
     end
 
@@ -169,6 +175,7 @@ function to_plots(file_path)
     xlabel!("Time (s)")
     ylabel!("Temperature (°C)")
     savefig(referenceplot, "./generated_plots/"*"$(file_path[13:end-4])"*"_reference.pdf")
+    savefig(referenceplot, "./plots_pngs/"*"$(file_path[13:end-4])"*"_reference.png")
 end
 
 # Looping through every file in the pyro_data directory an running it through the code above
@@ -185,7 +192,10 @@ end
 # Creating a summary table in a dataframe
 cooling_summary = DataFrame("Sample Name"=>all_names,
                             "Cooling Rate (°C/s)"=>all_cooling_rates,
-                            "95% Margin of Error (±)"=>all_errors)
+                            "95% Margin of Error (±)"=>all_errors, 
+                            "Selected Region Plot"=>png_files, 
+                            "Region Reference"=>png_ref)
+
 # Writing the dataframe into a CSV file
 CSV.write("cooling_summary.csv", cooling_summary)
 
