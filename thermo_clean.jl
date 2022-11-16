@@ -30,7 +30,7 @@ for file in files
 
     # change the names of the columns for consistency
     select!(df, dfnames[1] => "seconds", dfnames[2] => "nanosecs",
-            dfnames[3]=> (x -> collect.(eval.(Meta.parse.(x)))) =>"temps")
+            dfnames[3]=> (x -> map(y->abs.(y), collect.(eval.(Meta.parse.(x))))) =>"temps")
     
     push!(frames, df)
 
@@ -49,16 +49,16 @@ for file in files
     CSV.write("./thermo_cleaned_data/$(nm)_thermotemps.csv", updated)
         
     # function that takes the vector and reshapes it into the 4x4 array
-    function to_heat(x::Vector{<:Real})
+    function to_heat(x::Vector{Float64})
         hcat(x[[3, 7 , 11, 15]], x[[2, 6, 10, 14]], x[[1, 5, 9, 13]])'
     end
 
     transform!(df, "temps" => (x -> to_heat.(x)) => "heatmap")
 
-    anim = @animate for i in eachindex(df.temps) 
+    anim = @animate for i in 1:length(df.temps) 
         time = round(typeof(1u"s"), (df.seconds[i] - df.seconds[1])u"s"
                     + (df.nanosecs[i] - df.nanosecs[1])u"ns"|> u"s")
-        heatmap(df.heatmap[i], clims = (25, tmax+10), title = "$nm Thermocouple Heatmap",
+        heatmap(df.heatmap[i], clims = (25, tmax+5), title = "$nm Thermocouple Heatmap",
                 xlabel = "Time: $(time)", yticks = collect(1:4), dpi = 200)
 end
 
