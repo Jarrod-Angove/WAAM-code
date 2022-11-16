@@ -50,7 +50,7 @@ diffs = []
 is0s = []
 ends = []
 starts =[]
-for j in 1:length(labels)
+for j in 1:eachindex(labels)
     frame = frames[j]
     label = labels[j]
 

@@ -132,7 +132,6 @@ function to_plots(file_path)
     intervals = Vector{Any}()
     cooling_rates = Vector{Any}()
     errors = Vector{Float32}()
-    png_file = Vector{AbstractString}()
     # Loop through all of the regions selected above
     for region in regions
         i += 1
@@ -165,7 +164,7 @@ function to_plots(file_path)
         savefig(scatterplot, "./generated_plots/"*"$(file_path[13:end-4])"*"_plot$i.pdf")
         savefig(scatterplot, "./plots_pngs/"*"$(file_path[13:end-4])"*"_plot$i.png")
         push!(png_files, "./generated_plots/"*"$(file_path[13:end-4])"*"_plot$i.png")
-        push!(png_ref, "./plots_pngs/"*"$(file_path[13:end-4])"*"_reference.pdf")
+        push!(png_ref, "./plots_pngs/"*"$(file_path[13:end-4])"*"_reference.png")
 
     end
 
