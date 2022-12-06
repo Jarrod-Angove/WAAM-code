@@ -156,8 +156,8 @@ function to_plots(file_path)
 
 
         # This makes the plots of the individual regions
-        scatterplot = scatter(xdata, ydata, label = "Data", title = "Plot of $name")
-        plot!(x-> κ*x + T, label="$(round(κ,sigdigits=5)) x + $(round(T, sigdigits=5))")
+        scatterplot = scatter(xdata, ydata, label = "Data", fontfamily="Times Roman")
+        plot!(x-> κ*x + T, label="Fit: $(round(κ,sigdigits=5)) x + $(round(T, sigdigits=5))  ")
         xlabel!("Time (s)")
         ylabel!("Temperature (°C)")
         #Saving the plot, creating a name for it based on the original file and it's position in 'regions'
@@ -169,8 +169,8 @@ function to_plots(file_path)
     end
 
     # This creates the plot that shows the regions over the whole data set (reference plots)
-    referenceplot = plot(df.Time, df.Temp, label = "Original data")
-    scatter!(clusters.Time, clusters.Temp, label = "Selected regions")
+    referenceplot = plot(df.Time, df.Temp, label = "Original Data", fontfamily="Times Roman")
+    scatter!(clusters.Time, clusters.Temp, label = "Selected Points  ", yrange=(min(df.Temp...)-50, max(df.Temp...)+50), ms=2)
     xlabel!("Time (s)")
     ylabel!("Temperature (°C)")
     savefig(referenceplot, "./generated_plots/"*"$(file_path[13:end-4])"*"_reference.pdf")
