@@ -61,13 +61,26 @@ plot_data = plot_data[(plot_data.id .!= 6) .& (plot_data.id .!= 7), :]
 hotplate = plot_data[(plot_data.hotcold .== "h"), :]
 coldplate = plot_data[(plot_data.hotcold .== "c"), :]
 
+# Including model data from Anqi
+model_cr = [129.9987, 137.9946, 170.3942, 97.78071, 81.20779, 92.12833, 86.03073, 118.9481]
+# Model powers from the plates corresponding to the model
+model_power = [482.196727682091,
+ 616.297536437391,
+ 677.6194703710901,
+ 649.5880621007259,
+ 659.7991578482029,
+ 658.7953615727218,
+ 640.1630349988593,
+ 878.869965178166]
+
+
 @. model(x, p) = p[1]/(x - p[2])
 xdata = ustrip.(plot_data.powers)
 ydata = abs.(plot_data.c_ratecs)
 p0 = [90000.0, 100]
 wt = abs.(1 ./(plot_data.error95.^2))
 fit = curve_fit(model, xdata, ydata, wt, p0)
-CI = standard_errors(fit)
+CI = margin_error(fit, 0.05)
 
 x = range(200, 1100, length=1000)
 y = model(x, fit.param)
@@ -76,8 +89,8 @@ y_lower = model(x, fit.param .- CI)
 
 fit_cold = curve_fit(model, ustrip.(coldplate.powers), abs.(coldplate.c_ratecs), p0)
 fit_hot = curve_fit(model, ustrip.(hotplate.powers), abs.(hotplate.c_ratecs), p0)
-CI_cold = standard_errors(fit_cold)
-CI_hot= standard_errors(fit_hot)
+CI_cold = margin_error(fit_cold, 0.05)
+CI_hot= margin_error(fit_hot, 0.05)
 
 y_cold = model(x, fit_cold.param)
 y_cold_upper = model(x, fit_cold.param .+ CI_cold)
@@ -87,8 +100,8 @@ y_hot = model(x, fit_hot.param)
 y_hot_upper = model(x, fit_hot.param .+ CI_hot)
 y_hot_lower = model(x, fit_hot.param .- CI_hot)
 
-base_plot = plot(x, [y_upper, y_lower]; fillrange =y_lower, label = ["Standard Error  " ""], color = :LightSeaGreen, alpha=0.5)
-plot!(x, y, color=:black, label="")
+base_plot = plot(x, [y_upper, y_lower]; fillrange =y_lower, label = ["95% CI " ""], color = :LightSeaGreen, alpha=0.5)
+plot!(x, y, color=:black, label="Model")
 scatter!(ustrip.(coldplate.powers), abs.(coldplate.c_ratecs), yerror = coldplate.error95, 
 		fontfamily="Times Roman", label="Cold Plate", xlabel="Heat Input (J/mm)",
 		ylabel="Cooling Rate °C/s", color=:DodgerBlue)
@@ -102,6 +115,41 @@ plot!(x, [y_hot_upper, y_hot_lower]; fillrange=y_hot_lower, fontfamily="Times Ro
 	  alpha = 0.2, label = "", ls =:dot)
 plot!(x, [y_cold, y_hot], color=[:DodgerBlue :DarkOrange], label = ["Cold Plate Fit  " "Hot Plate Fit"])
 
+
 savefig(base_plot, "../final/Figures/results_overview_plot.pdf")
 savefig(hot_v_cold, "../final/Figures/hot_v_cold_plot.pdf")
 
+function is_in_set(input, set)
+   result = Bool[]
+   for x in input
+	   push!(result, x in set)
+   end
+   return result
+end
+
+myset = [4, 11, 12, 15, 17, 18, 19, 21]
+model_comp_df = plot_data[is_in_set(plot_data.id, myset) .&& 
+						  (plot_data.hotcold .== "h" .||
+						   (plot_data.id .== 17)), :]
+deleteat!(model_comp_df, 6)
+
+compare_model = scatter(ustrip.(model_comp_df.powers),abs.(model_comp_df.c_ratecs), yerror = model_comp_df.error95, label="Emperical Data  ", color=:DarkOrange, fontfamily="Times Roman",
+				  xlabel="Heat Input (J/mm)", ylabel="Cooling Rate °C/s")
+scatter!(model_power, model_cr, color=:Purple, markershape=:star5, label="Ansys Model Results  ")
+
+savefig(compare_model, "../final/Figures/model_anqi_comp.pdf")
+
+fits = [fit, fit_cold, fit_hot]
+fitnames = ["Combined", "Cold Plate", "Hot Plate"]
+strings = []
+using Printf
+for i in 1:lastindex(fits)
+	δ = margin_error(fits[i], 0.05)
+	p1str = @sprintf("%5.1f ± %5.1f",fits[i].param[1]/1000, δ[1]/1000)
+	p2str = @sprintf("%5.2f ± %5.1f",fits[i].param[2], δ[2])
+	str1 = fitnames[i] * " p₁ = "*p1str
+	str2 = fitnames[i] * " p₂ = "*p2str
+	strs = [str1, str2]
+	push!(strings, strs)
+end
+strings

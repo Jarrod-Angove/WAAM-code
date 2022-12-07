@@ -56,8 +56,9 @@ function to_plots(file_path)
 
     function sec_diff(x)
         # Take the second derivative of a vector
+        # Initiate the array
         ddt = []
-        # I assume a constant time step of 0.02s here; this is not technically correct
+        # Assume a constant time step of 0.02s here; this is not technically correct
         # Good enough for simple filter application
         for i in 2:(length(x)-1)
             # Append the derivative at the current index to ddt
@@ -84,29 +85,24 @@ function to_plots(file_path)
     # Number of rows in the unaltered data
     osize = size(df)[1]
 
-    # Making a dataframe is easier bc I need to resize time and temp to account for lost rows from diff
+    # Making a dataframe is easier bc I need to resize time
+    # and temp to account for lost rows from diff
     clusters = DataFrame(
                     Time = df[2:osize-1, :Time],
                     Temp = df[2:osize-1, :Temp],
                     Diff = sec_diff(df.Temp)
                     ) 
-    # Temp upper and lower bound based on the solidus and liquidus temperatures of 17-4PH SS; diff bound (symmetric for diff)
+    # Temp upper and lower bound based on the solidus
+    # and liquidus temperatures of 17-4PH SS; diff bound
+    # (symmetric for diff)
     temp_ub = 1457
     temp_lb = 1266
     diff_b = 10000
-
-    # This is where the noise from splatter is removed 
-    # The diff filter is doing most of the heavy lifting here
-    # The diff filter bound diff_b is the hardest part to get right; needs to be tuned
-    # The second part, I remove anything with near zero d2T/dt2 to get rid of stragglers
+    # Remove anything with near zero d2T/dt2 to get rid of stragglers
     subset!(clusters,
             :Temp => ByRow(T -> temp_ub > T > temp_lb),
             :Diff => ByRow(dT-> -diff_b < dT < diff_b && (dT>1 || dT<-1))
         )
-    # If there is a time gap in clusters greater than 2 seconds, create 2 datasets
-    # Else, create only one
-    jump = argmax(diff(clusters.Time))
-    jsize = clusters[jump+1, :Time] - clusters[jump, :Time]
 
     # This is the model (simple linear) used by the least squares fit in the loop below
     @. model(x, p) = p[1]*x + p[2]
@@ -114,7 +110,10 @@ function to_plots(file_path)
 
     regions = Vector{Any}()
     Rs = Vector{Float32}()
-
+    # If there is a time gap in clusters greater than 2 seconds, create 2 datasets
+    # Else, create only one
+    jump = argmax(diff(clusters.Time))
+    jsize = clusters[jump+1, :Time] - clusters[jump, :Time]
     # Tests if the time gap is greater than 5 seconds to figure out if there are two beads on the plate or just one
     if jsize>5
         # Seperating them into regions if there are two
