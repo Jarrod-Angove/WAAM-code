@@ -22,7 +22,7 @@ You can run julia scripts in much the same way that you would run a python scrip
 julia pyro_clean.jl
 ```
 
-This will run the `pyro_clean.jl` script. Note that the directory of data that this script acts on is currently hard-coded in, and is currently set to the pyro_data folder. Therefore, if there is a new sample, it is easiest to clone the repo and simply place the new dat file inside this folder. I'm currently working on making this easier; see the TODO file for more info on stuff I am working on. 
+This will run the `pyro_clean.jl` script. Note that the directory of data that this script acts on is currently hard-coded in, and is set to the `pyro_data` folder. Therefore, if there is a new sample, it is easiest to clone the repo and simply place the new dat file inside this folder. I'm currently working on making this easier; see the TODO file for more info.
 
 Alternatively, you can run the files from the julia REPL using the `include()` function. Note that you need to be in the same directory as the script you are trying to run in both cases. 
 
@@ -55,5 +55,6 @@ This will take some time to launch as there is a lot going on. From here, it is 
 
 As this file also creates the cooling rate vs heat input plot, you can adjust the calculation parameters here. This notebook actually pulls the power data range from the `cooling_summary_expanded.csv` file, so any new ranges need to be manually written into this before a plot can be generated. 
 
+## Generating the finalized plots
 
-
+The `final_plots.jl` file can be used to create the high-quality pdf plots based on the data in the `cooling_summary_expanded.csv` file. This is run in the same way as the other scripts, without any input arguments. 

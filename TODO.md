@@ -11,7 +11,7 @@ author: "Jarrod Angove"
     - Add time range selection via text input
     - Function to add multiple cooling rate slopes and image export
     - Add labels to the best fit curves
-    - Calculate $R^2$ for the fit lines
+    - Calculate $R^2$ for the fit lines rather than just the margin of error
     - Add the ability to push to a file? 
 - Future: use GPT to convert everything to python scripts
 
