@@ -19,7 +19,7 @@ You can run julia scripts in much the same way that you would run a python scrip
 ### Pyrometer data
 
 ```shell
-julia `pyro_clean.jl`
+julia pyro_clean.jl
 ```
 
 This will run the `pyro_clean.jl` script. Note that the directory of data that this script acts on is currently hard-coded in, and is currently set to the pyro_data folder. Therefore, if there is a new sample, it is easiest to clone the repo and simply place the new dat file inside this folder. I'm currently working on making this easier; see the TODO file for more info on stuff I am working on. 
