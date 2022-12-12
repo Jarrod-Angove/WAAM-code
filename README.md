@@ -40,7 +40,7 @@ julia thermo_clean.jl
 
 ### Power data; graphical tool
 
-This one is a little different because it is written in a pluto notebook. These are similar to jupyter notebooks, but are reactive, meaning all of the cells update when another cell is changed. First, you will need to launch the julia repo and add the pluto notebook package to your session. Then, you can launch the pluto application. This will open a tab in your browser with the application running. 
+This one is a little different because it is written in a pluto notebook. These are similar to jupyter notebooks, but are reactive, meaning all of the cells update when another cell is changed. First, you will need to launch the julia REPL and add the pluto notebook package to your session. Then, you can launch the pluto application. This will open a tab in your browser with the application running. 
 
 ```julia
 import Pkg
