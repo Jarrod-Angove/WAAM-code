@@ -40,6 +40,7 @@ msgString	bag2csv.py	/^				msgString = str(msg)$/;"	v
 numberOfFiles	bag2csv.py	/^	numberOfFiles = "1"$/;"	v
 numberOfFiles	bag2csv.py	/^	numberOfFiles = str(len(listOfBagFiles))$/;"	v
 pyro_clean	makie_tool.jl	/^function pyro_clean(file_path)$/;"	f
+rel_err	final_plots.jl	/^rel_err(emp, mod) = abs.((emp - mod)\/emp) * 100$/;"	f
 sec_diff	pyro_clean.jl	/^    function sec_diff(x)$/;"	f	function:to_plots
 smooth	power_clean.jl	/^function smooth(data, x)$/;"	f
 splitPair	bag2csv.py	/^					splitPair = nameValuePair.split(':')$/;"	v

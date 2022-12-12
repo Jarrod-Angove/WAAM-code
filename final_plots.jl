@@ -37,17 +37,39 @@ end;
 
 powers = []
 plots = []
-names = []
+named = []
+captions = []
 for row in eachrow(scrubbed)
 	(pow, plt) = flip(row.powerfile, row.range, row.ttsms)
 	push!(powers, pow)
 	push!(plots, plt)
-    push!(names, "Plate"*string(row.id)*"_"*row.hotcold)
+    push!(named, "Plate"*string(row.id)*"_"*row.hotcold)
+	if row.hotcold == "c"
+		cap = "Power input plot for plate $(row.id) (cold bead). "
+	elseif row.hotcold == "h"
+		cap = "Power input plot for plate $(row.id) (hot bead). "
+	end
+	push!(captions, cap)
 end
 
+texstring = ""
 for i in 1:lastindex(plots)
-	savefig(plots[i], "../final/Figures/power_selection/"*names[i]*".pdf")
+	savefig(plots[i], "../final/Figures/power_selection/"*named[i]*".pdf")
+	global texstring *= 
+"
+
+\\begin{figure}[htp]
+   \\centering
+   \\includegraphics[width=0.7\\textwidth]{Figures/power_selection/$(named[i]).pdf}
+   \\caption{$(captions[i])}
+\\end{figure}
+"
 end
+
+touch("../final/power_figs.tex")
+my_file = open("../final/power_figs.tex", "w")
+write(my_file, texstring)
+close(my_file)
 
 scrubbed.powers = powers
 
@@ -134,8 +156,8 @@ model_comp_df = plot_data[is_in_set(plot_data.id, myset) .&&
 deleteat!(model_comp_df, 6)
 
 compare_model = scatter(ustrip.(model_comp_df.powers),abs.(model_comp_df.c_ratecs), yerror = model_comp_df.error95, label="Emperical Data  ", color=:DarkOrange, fontfamily="Times Roman",
-				  xlabel="Heat Input (J/mm)", ylabel="Cooling Rate °C/s")
-scatter!(model_power, model_cr, color=:Purple, markershape=:star5, label="Ansys Model Results  ")
+						xlabel="Heat Input (J/mm)", ylabel="Cooling Rate °C/s")
+scatter!(model_power, model_cr, color=:Purple, markershape=:star5, label="Heat Flow Model Results  ")
 
 savefig(compare_model, "../final/Figures/model_anqi_comp.pdf")
 
@@ -152,4 +174,11 @@ for i in 1:lastindex(fits)
 	strs = [str1, str2]
 	push!(strings, strs)
 end
-strings
+
+rel_err(emp, mod) = abs.((emp - mod)/emp) * 100
+
+exp_err = rel_err.(abs.(model_comp_df.c_ratecs), abs.(model_cr))
+
+model_comp_df.rel_err = exp_err
+
+corrected_df = model_comp_df[model_comp_df.id .!=4 .&& model_comp_df.id .!=19 , :]
