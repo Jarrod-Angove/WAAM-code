@@ -1,7 +1,4 @@
----
-title: "To do list for WAAM code repo"
-author: "Jarrod Angove"
----
+# To-do list for WAAM repo
 
 * Break up scripts into functions
 * Turn all of the files into a single julia module
@@ -13,5 +10,5 @@ author: "Jarrod Angove"
     - Add labels to the best fit curves
     - Calculate $R^2$ for the fit lines rather than just the margin of error
     - Add the ability to push to a file? 
-- Future: use GPT to convert everything to python scripts
+- Future: use GPT to convert everything to python scripts? (is it even possible?)
 

@@ -54,7 +54,7 @@ end
 
 texstring = ""
 for i in 1:lastindex(plots)
-	savefig(plots[i], "../final/Figures/power_selection/"*named[i]*".pdf")
+	savefig(plots[i], "./final_plots/power_selection/"*named[i]*".pdf")
 	global texstring *= 
 "
 
@@ -66,8 +66,8 @@ for i in 1:lastindex(plots)
 "
 end
 
-touch("../final/power_figs.tex")
-my_file = open("../final/power_figs.tex", "w")
+touch("./final_plots/power_figs.tex")
+my_file = open("./final_plots/power_figs.tex", "w")
 write(my_file, texstring)
 close(my_file)
 
@@ -122,13 +122,19 @@ y_hot = model(x, fit_hot.param)
 y_hot_upper = model(x, fit_hot.param .+ CI_hot)
 y_hot_lower = model(x, fit_hot.param .- CI_hot)
 
+# This section generates the plot objects; see here for formatting changes
+# The main plot that shows the cooling rate vs heat input
+# This is the model fit of the data
 base_plot = plot(x, [y_upper, y_lower]; fillrange =y_lower, label = ["95% CI " ""], color = :LightSeaGreen, alpha=0.5)
 plot!(x, y, color=:black, label="Model")
+# This is the actual data for the cold plate beads; coloured blue
 scatter!(ustrip.(coldplate.powers), abs.(coldplate.c_ratecs), yerror = coldplate.error95, 
 		fontfamily="Times Roman", label="Cold Plate", xlabel="Heat Input (J/mm)",
 		ylabel="Cooling Rate °C/s", color=:DodgerBlue)
+# This is the actual data for the hot plate cooling rates
 scatter!(ustrip.(hotplate.powers), abs.(hotplate.c_ratecs), yerror = hotplate.error95, label="Hot Plate", color=:DarkOrange)
 
+# This compares the model fits of the hot and cold plates individually
 hot_v_cold = plot(x, [y_cold_upper, y_cold_lower]; fillrange=y_cold_lower, fontfamily="Times Roman",
 				  xlabel="Heat Input (J/mm)", ylabel="Cooling Rate °C/s",
 				  color = [:DodgerBlue :DodgerBlue], alpha=0.2, label="", ls=:dot)
@@ -138,9 +144,11 @@ plot!(x, [y_hot_upper, y_hot_lower]; fillrange=y_hot_lower, fontfamily="Times Ro
 plot!(x, [y_cold, y_hot], color=[:DodgerBlue :DarkOrange], label = ["Cold Plate Fit  " "Hot Plate Fit"])
 
 
-savefig(base_plot, "../final/Figures/results_overview_plot.pdf")
-savefig(hot_v_cold, "../final/Figures/hot_v_cold_plot.pdf")
+savefig(base_plot, "./final_plots/results_overview_plot.pdf")
+savefig(hot_v_cold, "./final_plots/hot_v_cold_plot.pdf")
 
+# This tests if a number is in a set (couldn't get the built in function to work)
+# Credit to GPT-3 :)
 function is_in_set(input, set)
    result = Bool[]
    for x in input
@@ -149,17 +157,18 @@ function is_in_set(input, set)
    return result
 end
 
+# These are the plate numbers that Anqi's model is tested on
 myset = [4, 11, 12, 15, 17, 18, 19, 21]
 model_comp_df = plot_data[is_in_set(plot_data.id, myset) .&& 
 						  (plot_data.hotcold .== "h" .||
 						   (plot_data.id .== 17)), :]
-deleteat!(model_comp_df, 6)
+deleteat!(model_comp_df, 5)
 
 compare_model = scatter(ustrip.(model_comp_df.powers),abs.(model_comp_df.c_ratecs), yerror = model_comp_df.error95, label="Emperical Data  ", color=:DarkOrange, fontfamily="Times Roman",
 						xlabel="Heat Input (J/mm)", ylabel="Cooling Rate °C/s")
 scatter!(model_power, model_cr, color=:Purple, markershape=:star5, label="Heat Flow Model Results  ")
 
-savefig(compare_model, "../final/Figures/model_anqi_comp.pdf")
+savefig(compare_model, "./final_plots/model_anqi_comp.pdf")
 
 fits = [fit, fit_cold, fit_hot]
 fitnames = ["Combined", "Cold Plate", "Hot Plate"]
@@ -177,6 +186,7 @@ end
 
 rel_err(emp, mod) = abs.((emp - mod)/emp) * 100
 
+# Error of the model compared to the experimental data
 exp_err = rel_err.(abs.(model_comp_df.c_ratecs), abs.(model_cr))
 
 model_comp_df.rel_err = exp_err
